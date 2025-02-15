@@ -1,0 +1,14 @@
+{
+  "framework": "vite",
+  "buildCommand": "yarn build",
+  "outputDirectory": "dist",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/"
+    }
+  ],
+  "env": {
+    "VITE_API_URL": "https://crypto-dashboard-backend-danielbmata.vercel.app"
+  }
+} 
