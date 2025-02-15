@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white dark:bg-dark-lighter rounded-lg shadow p-4">
+  <div class="bg-white dark:bg-dark-lighter rounded-lg shadow p-4 transition-all duration-300">
     <!-- Cabeçalho do gráfico -->
     <div v-if="crypto" class="flex justify-between items-center mb-4">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -11,11 +11,19 @@
     </div>
     
     <!-- Container do gráfico -->
-    <div class="h-64 flex items-center justify-center">
-      <div v-if="!crypto || !crypto.sparkline_in_7d" class="text-gray-500">
+    <div class="h-64 flex items-center justify-center relative">
+      <div 
+        v-if="!crypto || !crypto.sparkline_in_7d" 
+        class="text-gray-500 absolute inset-0 flex items-center justify-center"
+      >
         Dados do gráfico não disponíveis
       </div>
-      <canvas v-else ref="chartRef"></canvas>
+      <canvas 
+        v-else 
+        ref="chartRef"
+        class="transition-opacity duration-300"
+        :class="{ 'opacity-0': loading }"
+      ></canvas>
     </div>
   </div>
 </template>
@@ -33,10 +41,13 @@ const props = defineProps<{
 // Referências para o canvas do gráfico
 const chartRef = ref<HTMLCanvasElement | null>(null)
 let chart: Chart | null = null
+const loading = ref(false)
 
 // Função para criar/atualizar o gráfico
-const createChart = () => {
+const createChart = async () => {
   if (!chartRef.value || !props.crypto.sparkline_in_7d) return
+  
+  loading.value = true
   
   const ctx = chartRef.value.getContext('2d')
   if (!ctx) return
@@ -53,6 +64,9 @@ const createChart = () => {
   if (chart) {
     chart.destroy()
   }
+
+  // Pequeno delay para a animação
+  await new Promise(resolve => setTimeout(resolve, 150))
 
   // Cria um novo gráfico com Chart.js
   chart = new Chart(ctx, {
@@ -71,6 +85,10 @@ const createChart = () => {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: {
+        duration: 750,
+        easing: 'easeInOutQuart'
+      },
       plugins: {
         legend: {
           display: false
@@ -85,6 +103,8 @@ const createChart = () => {
       }
     }
   })
+
+  loading.value = false
 }
 
 // Cria o gráfico quando o componente é montado
@@ -107,4 +127,10 @@ onUnmounted(() => {
     chart.destroy()
   }
 })
-</script> 
+</script>
+
+<style scoped>
+.opacity-0 {
+  opacity: 0;
+}
+</style> 

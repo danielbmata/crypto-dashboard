@@ -3,10 +3,23 @@ import AppLayout from './components/layout/AppLayout.vue'
 import CryptoTable from './components/crypto/CryptoTable.vue'
 import CryptoChart from './components/crypto/CryptoChart.vue'
 import { useCryptoStore } from './store/useCryptoStore'
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import type { Crypto } from '@/types'
+
+// Define o título da página
+document.title = 'Crypto Dashboard'
 
 const store = useCryptoStore()
-const topCrypto = computed(() => store.paginatedCryptos[0])
+const selectedCrypto = ref<Crypto | null>(null)
+
+// Usa a criptomoeda selecionada ou a primeira da lista
+const displayedCrypto = computed(() => 
+  selectedCrypto.value || store.paginatedCryptos[0]
+)
+
+const handleCryptoSelect = (crypto: Crypto) => {
+  selectedCrypto.value = crypto
+}
 </script>
 
 <template>
@@ -14,12 +27,12 @@ const topCrypto = computed(() => store.paginatedCryptos[0])
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Tabela de Criptomoedas -->
       <div class="lg:col-span-2">
-        <CryptoTable />
+        <CryptoTable @select-crypto="handleCryptoSelect" />
       </div>
 
-      <!-- Gráfico da Principal Cripto -->
-      <div v-if="topCrypto">
-        <CryptoChart :crypto="topCrypto" />
+      <!-- Gráfico da Criptomoeda -->
+      <div v-if="displayedCrypto">
+        <CryptoChart :crypto="displayedCrypto" />
       </div>
     </div>
   </AppLayout>

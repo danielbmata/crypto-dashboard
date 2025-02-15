@@ -24,7 +24,13 @@
               <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
             </td>
           </tr>
-          <tr v-else v-for="crypto in paginatedCryptos" :key="crypto.id" class="hover:bg-gray-50 dark:hover:bg-dark-lighter">
+          <tr 
+            v-else 
+            v-for="crypto in paginatedCryptos" 
+            :key="crypto.id" 
+            class="hover:bg-gray-50 dark:hover:bg-dark-lighter cursor-pointer transition-colors duration-200"
+            @click="selectCrypto(crypto)"
+          >
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex items-center">
                 <img :src="crypto.image" :alt="crypto.name" class="h-8 w-8 rounded-full">
@@ -77,6 +83,7 @@
 import { onMounted, computed } from 'vue'
 import { useCryptoStore } from '@/store/useCryptoStore'
 import Pagination from '@/components/common/Pagination.vue'
+import type { Crypto } from '@/types'
 
 const store = useCryptoStore()
 
@@ -88,6 +95,15 @@ const totalPages = computed(() => store.totalPages)
 const pageNumbers = computed(() => store.pageNumbers)
 const itemsPerPage = computed(() => store.itemsPerPage)
 
+// Emite o evento quando uma criptomoeda é selecionada
+const emit = defineEmits<{
+  (e: 'select-crypto', crypto: Crypto): void
+}>()
+
+const selectCrypto = (crypto: Crypto) => {
+  emit('select-crypto', crypto)
+}
+
 const handlePageChange = (page: number) => {
   store.setPage(page)
 }
@@ -95,4 +111,14 @@ const handlePageChange = (page: number) => {
 onMounted(() => {
   store.fetchCryptos()
 })
-</script> 
+</script>
+
+<style scoped>
+tr {
+  @apply transition-all duration-200;
+}
+
+tr:hover td {
+  @apply bg-gray-50 dark:bg-dark-lighter;
+}
+</style> 
